@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title><style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+        background: #0f0f0f;
+        color: #ffffff;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 20px;
+    }
+
+    h1 {
+        font-size: 28px;
+        margin-bottom: 24px;
+        color: #ffffff;
+    }
+
+    textarea {
+        width: 100%;
+        max-width: 600px;
+        height: 120px;
+        background: #1a1a1a;
+        color: #ffffff;
+        border: 1px solid #333;
+        border-radius: 10px;
+        padding: 14px;
+        font-size: 15px;
+        resize: none;
+        outline: none;
+    }
+
+    textarea:focus {
+        border-color: #555;
+    }
+
+    button {
+        margin-top: 12px;
+        width: 100%;
+        max-width: 600px;
+        padding: 12px;
+        background: #ffffff;
+        color: #0f0f0f;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #e0e0e0;
+    }
+
+    button:disabled {
+        background: #333;
+        color: #666;
+        cursor: not-allowed;
+    }
+
+    #display {
+        margin-top: 32px;
+        width: 100%;
+        max-width: 600px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    #display p {
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        border-radius: 10px;
+        padding: 14px 16px;
+        font-size: 14px;
+        line-height: 1.6;
+        color: #e0e0e0;
+    }
+</style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>My Notes</h1>
+    <textarea id="note" placeholder="write your Note"></textarea>
+    <button id="saveBtn">SAVE</button>
+    <div id="display">
+
+    </p>
+    <script>
+        const db = window.supabase.createClient(
+            'https://gltfngqeytfhvxhrejia.supabase.co',
+            'sb_publishable_NxHgbWelF-kmybiQ8m16_A_s-HRPIq3'
+        )
+
+        const note = document.querySelector("#note")
+        const saveBtn = document.querySelector("#saveBtn")
+        let display = document.querySelector("#display")
+
+        async function loadNotes(){
+            try{
+            const {data,error} = await db.from('notes').select('*')
+            if(error) throw error
+            let html = ""
+            for(let note of data){
+                html += `<p>${note.content}</p>`
+            }
+            display.innerHTML = html
+        }
+        catch(error){
+            console.log(error)
+            display.textContent = "something went wrong..."
+        }
+    }
+
+        saveBtn.addEventListener("click", async function(){
+            saveBtn.disabled = true
+            try{
+            const { data, error } = await db
+            .from('notes')
+            .insert([{ content: note.value }])
+            
+            if(error) throw error
+            display.textContent = "Note Saved!"
+            loadNotes()
+            }
+            catch(error){
+                console.log(error)
+                display.textContent = "something Went Wrong...Try Again"
+            }
+            finally{
+                note.value = ""
+                saveBtn.disabled = false
+            }
+
+        })
+        loadNotes()
+    </script>
+</body>
+</html>
